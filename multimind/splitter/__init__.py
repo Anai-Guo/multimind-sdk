@@ -28,8 +28,9 @@ class TextSplitter:
 
             # Try to break at sentence boundary
             if end < len(text):
-                # Look for sentence endings
-                for i in range(end, max(start, end - 100), -1):
+                # Look for sentence endings past the overlap region, so the
+                # next chunk always starts after the current one
+                for i in range(end, max(start + self.overlap, end - 100), -1):
                     if text[i] in ".!?":
                         end = i + 1
                         break
@@ -38,7 +39,8 @@ class TextSplitter:
             if chunk:
                 chunks.append(chunk)
 
-            start = end - self.overlap
+            next_start = end - self.overlap
+            start = next_start if next_start > start else end
             if start >= len(text):
                 break
 
